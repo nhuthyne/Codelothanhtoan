@@ -121,6 +121,7 @@
             transition: background 0.2s;
         }
         .btn-pay:hover { background: #1d4ed8; }
+        .btn-pay:disabled { background: #94a3b8; cursor: not-allowed; }
 
         /* QR Style */
         #qrScreen { display: none; text-align: center; }
@@ -142,7 +143,7 @@
     <div class="brand-header">
         <h1>Codelo VN</h1>
         <p>Cổng thanh toán trực tuyến - nhận tài liệu qua gmail trong 2 phút</p>
-<p>Liên hệ Codelo tại: 0376-138-554</p>
+        <p>Liên hệ Codelo tại: 0376-138-554</p>
     </div>
 
     <div id="mainForm">
@@ -164,29 +165,60 @@
             <input type="email" class="input-box" id="cEmail" placeholder="Email nhận file (Ví dụ: nguyenvan@gmail.com)">
         </div>
 
-        <button class="btn-pay" onclick="processPayment()">Xác nhận thanh toán</button>
+        <button class="btn-pay" id="btnSubmit" onclick="processPayment()">Xác nhận thanh toán</button>
     </div>
 
     <div id="qrScreen" class="section-card">
         <h3 style="margin-top:0">Quét mã QR để thanh toán</h3>
         <img id="qrImg" class="qr-img" src="" alt="QR">
         <div class="code-display" id="transferCode"></div>
-        <p style="font-size: 13px; color: var(--text-muted)">Hệ thống sẽ gửi file qua Email sau khi nhận tiền.</p>
+        <p style="font-size: 13px; color: var(--text-muted)">Hệ thống sẽ tự động gửi file qua Email của bạn.</p>
     </div>
 </div>
 
 <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
+
     function processPayment() {
-        const email = document.getElementById('cEmail').value;
-        if(!email.includes('@')) { alert("Vui lòng nhập Email hợp lệ"); return; }
+        const name = document.getElementById('cName').value.trim();
+        const phone = document.getElementById('cPhone').value.trim();
+        const email = document.getElementById('cEmail').value.trim();
         
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailRegex.test(email)) { 
+            alert("Vui lòng nhập Email hợp lệ để nhận file"); 
+            return; 
+        }
+        
+        const btn = document.getElementById('btnSubmit');
+        btn.innerText = "Đang xử lý dữ liệu...";
+        btn.disabled = true;
+
         const code = "CODELO" + Math.floor(1000 + Math.random() * 9000);
         const qr = `https://img.vietqr.io/image/TPBank-00005508312-compact2.png?amount=2000&addInfo=${code}&accountName=TRAN BUI NHUT HY`;
         
-        document.getElementById('mainForm').style.display = 'none';
-        document.getElementById('qrImg').src = qr;
-        document.getElementById('transferCode').innerText = code;
-        document.getElementById('qrScreen').style.display = 'block';
+        // Gửi toàn bộ dữ liệu (Email, Tên, SĐT) về Sheets
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ 
+                action: "createOrder", 
+                email: email, 
+                orderCode: code,
+                customerName: name || "bạn", 
+                customerPhone: phone || "Không cung cấp",
+                productName: "Bản mẫu vật lý Codelo" 
+            })
+        }).then(() => {
+            document.getElementById('mainForm').style.display = 'none';
+            document.getElementById('qrImg').src = qr;
+            document.getElementById('transferCode').innerText = code;
+            document.getElementById('qrScreen').style.display = 'block';
+        }).catch(() => {
+            alert("Lỗi kết nối mạng. Vui lòng thử lại!");
+            btn.innerText = "Xác nhận thanh toán";
+            btn.disabled = false;
+        });
     }
 </script>
 

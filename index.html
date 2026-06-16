@@ -73,7 +73,7 @@
         const BANK_ID = "TPBank"; // Mã ngân hàng 
         const ACCOUNT_NO = "00005508312"; // Số tài khoản 
         const ACCOUNT_NAME = "TRAN BUI NHUT HY"; // Tên chủ tài khoản
-        const PRODUCT_PRICE = "20000"; // Giá tiền sản phẩm (VND)
+        const PRODUCT_PRICE = "2000"; // Giá tiền sản phẩm (VND)
         
         // Link Apps Script nhận dữ liệu (Đã cấu hình sẵn cho cậu chủ)
         const scriptUrl = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
@@ -91,7 +91,7 @@
             document.getElementById('payBtn').style.opacity = "0.7";
 
             // Tạo mã đơn hàng duy nhất
-            const orderCode = "CODELO_" + Math.floor(1000 + Math.random() * 9000);
+            const orderCode = "CODELO" + Math.floor(1000 + Math.random() * 9000);
             
             // Link tạo ảnh QR từ VietQR
             const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${PRODUCT_PRICE}&addInfo=${orderCode}&accountName=${ACCOUNT_NAME}`;

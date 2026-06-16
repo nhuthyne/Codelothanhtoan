@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codelo - Thanh Toán Tự Động</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --primary: #8a98f1; /* Tông pastel tím xanh */
+            --text-color: #4a4a4a;
+        }
+        body {
+            /* Nền gradient pastel nhẹ nhàng */
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;
+        }
+        .checkout-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 40px 30px; border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 340px; border: 1px solid var(--glass-border);
+            text-align: center; color: var(--text-color);
+        }
+        .checkout-card h2 { margin-top: 0; color: #5a67d8; font-weight: 700; }
+        input {
+            width: 100%; padding: 14px; margin: 15px 0; border: none;
+            border-radius: 12px; background: rgba(255, 255, 255, 0.7);
+            color: #333; box-sizing: border-box; font-size: 14px;
+            outline: 2px solid transparent; transition: all 0.3s;
+        }
+        input:focus { outline: 2px solid var(--primary); background: #fff; }
+        button {
+            width: 100%; padding: 14px; background: var(--primary); border: none;
+            border-radius: 12px; color: white; font-weight: bold; font-size: 16px;
+            cursor: pointer; transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 15px rgba(138, 152, 241, 0.4);
+        }
+        button:hover { transform: translateY(-2px); background: #7685e8; }
+        .qr-box { margin-top: 25px; display: none; animation: fadeIn 0.5s ease-in-out; }
+        .qr-box img { width: 100%; border-radius: 16px; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .magic-code { background: white; padding: 10px; border-radius: 8px; font-weight: bold; color: #e53e3e; letter-spacing: 1px; margin: 10px 0;}
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-card">
+        <h2>Codelo Store</h2>
+        <p style="font-size: 14px; margin-bottom: 25px;">Nhập Email để nhận sản phẩm ngay lập tức sau khi thanh toán ⚡</p>
+        
+        <input type="email" id="customerEmail" placeholder="ví dụ: khachhang@gmail.com" required>
+        <button id="payBtn" onclick="generateInvoice()">Tiến Hành Thanh Toán</button>
+
+        <div id="qrResult" class="qr-box">
+            <p style="font-size: 13px; font-weight: bold;">Quét mã qua App Ngân hàng/ZaloPay</p>
+            <img id="qrImage" src="" alt="Mã QR Thanh Toán">
+            
+            <p style="font-size: 13px; margin-top: 15px;">Hoặc chuyển khoản thủ công với nội dung:</p>
+            <div class="magic-code" id="transferContent"></div>
+            <p style="font-size: 12px; color: #718096;">Hệ thống sẽ tự động gửi file về email trong 5-10 giây.</p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CẬU CHỦ ĐIỀN THÔNG TIN NGÂN HÀNG Ở ĐÂY NHÉ!
+        // ==========================================
+        const BANK_ID = "TPBank"; // Mã ngân hàng (ví dụ: TPBank, Vietcombank, MB...)
+        const ACCOUNT_NO = "00005508312"; // Số tài khoản của cậu chủ
+        const ACCOUNT_NAME = "TRAN BUI NHUT HY"; // Tên chủ tài khoản (Viết hoa không dấu)
+        const PRODUCT_PRICE = "20000"; // Giá tiền sản phẩm (VND)
+        // ==========================================
+
+        function generateInvoice() {
+            const email = document.getElementById('customerEmail').value;
+            if(!email || !email.includes('@')) { 
+                alert("Cậu chủ nhắc khách nhập đúng Email nhé!"); 
+                return; 
+            }
+
+            // Đổi text nút bấm để tạo cảm giác hệ thống đang xử lý
+            document.getElementById('payBtn').innerText = "Đang tạo mã QR...";
+            document.getElementById('payBtn').style.opacity = "0.7";
+
+            // Tạo mã nội dung chuyên nghiệp: CODELO_ + 4 số ngẫu nhiên
+            const orderCode = "CODELO_" + Math.floor(1000 + Math.random() * 9000);
+            
+            // Gọi API VietQR để tự động tạo ảnh QR cực nét
+            // Cấu trúc API: https://img.vietqr.io/image/{bank}-{account}-{template}.png?amount={amount}&addInfo={content}&accountName={name}
+            const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${PRODUCT_PRICE}&addInfo=${orderCode}&accountName=${ACCOUNT_NAME}`;
+
+            // Hiển thị kết quả lên màn hình
+            setTimeout(() => {
+                document.getElementById('qrImage').src = qrUrl;
+                document.getElementById('transferContent').innerText = orderCode;
+                document.getElementById('qrResult').style.display = "block";
+                document.getElementById('payBtn').style.display = "none";
+                document.getElementById('customerEmail').disabled = true; // Khóa ô nhập email
+            }, 800); // Giả lập độ trễ nhỏ để UX mượt hơn
+
+            // (Phần code gửi Email và Mã này lên Google Sheets anh sẽ hướng dẫn tiếp khi cậu chủ ưng giao diện này)
+        }
+    </script>
+
+</body>
+</html>

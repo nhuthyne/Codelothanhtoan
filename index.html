@@ -68,42 +68,53 @@
 
     <script>
         // ==========================================
-        // CẬU CHỦ ĐIỀN THÔNG TIN NGÂN HÀNG Ở ĐÂY NHÉ!
+        // THÔNG TIN CẤU HÌNH CỦA CODELO
         // ==========================================
-        const BANK_ID = "TPBank"; // Mã ngân hàng (ví dụ: TPBank, Vietcombank, MB...)
-        const ACCOUNT_NO = "00005508312"; // Số tài khoản của cậu chủ
-        const ACCOUNT_NAME = "TRAN BUI NHUT HY"; // Tên chủ tài khoản (Viết hoa không dấu)
+        const BANK_ID = "TPBank"; // Mã ngân hàng 
+        const ACCOUNT_NO = "00005508312"; // Số tài khoản 
+        const ACCOUNT_NAME = "TRAN BUI NHUT HY"; // Tên chủ tài khoản
         const PRODUCT_PRICE = "20000"; // Giá tiền sản phẩm (VND)
+        
+        // Link Apps Script nhận dữ liệu (Đã cập nhật theo yêu cầu)
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
         // ==========================================
 
         function generateInvoice() {
             const email = document.getElementById('customerEmail').value;
             if(!email || !email.includes('@')) { 
-                alert("Cậu chủ nhắc khách nhập đúng Email nhé!"); 
+                alert("Vui lòng nhập đúng địa chỉ Email nhé!"); 
                 return; 
             }
 
-            // Đổi text nút bấm để tạo cảm giác hệ thống đang xử lý
-            document.getElementById('payBtn').innerText = "Đang tạo mã QR...";
+            // Đổi giao diện nút bấm trong lúc chờ
+            document.getElementById('payBtn').innerText = "Đang tạo đơn hàng...";
             document.getElementById('payBtn').style.opacity = "0.7";
 
-            // Tạo mã nội dung chuyên nghiệp: CODELO_ + 4 số ngẫu nhiên
+            // Tạo mã đơn hàng duy nhất
             const orderCode = "CODELO_" + Math.floor(1000 + Math.random() * 9000);
             
-            // Gọi API VietQR để tự động tạo ảnh QR cực nét
-            // Cấu trúc API: https://img.vietqr.io/image/{bank}-{account}-{template}.png?amount={amount}&addInfo={content}&accountName={name}
+            // Link tạo ảnh QR từ VietQR
             const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${PRODUCT_PRICE}&addInfo=${orderCode}&accountName=${ACCOUNT_NAME}`;
 
-            // Hiển thị kết quả lên màn hình
-            setTimeout(() => {
+            // Gửi dữ liệu (Email & Mã đơn) lên Google Sheets
+            fetch(scriptUrl, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "createOrder", email: email, orderCode: orderCode })
+            }).then(() => {
+                // Sau khi gửi dữ liệu xong thì hiển thị mã QR lên màn hình
                 document.getElementById('qrImage').src = qrUrl;
                 document.getElementById('transferContent').innerText = orderCode;
+                
                 document.getElementById('qrResult').style.display = "block";
                 document.getElementById('payBtn').style.display = "none";
-                document.getElementById('customerEmail').disabled = true; // Khóa ô nhập email
-            }, 800); // Giả lập độ trễ nhỏ để UX mượt hơn
-
-            // (Phần code gửi Email và Mã này lên Google Sheets anh sẽ hướng dẫn tiếp khi cậu chủ ưng giao diện này)
+                document.getElementById('customerEmail').disabled = true; // Khóa ô nhập email để tránh nhập lại
+            }).catch(error => {
+                alert("Có lỗi xảy ra khi tạo đơn. Em hãy kiểm tra lại kết nối mạng nhé!");
+                document.getElementById('payBtn').innerText = "Thử lại";
+                document.getElementById('payBtn').style.opacity = "1";
+            });
         }
     </script>
 

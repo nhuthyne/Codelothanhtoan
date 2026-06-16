@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codelo VN - Enterprise Checkout</title>
+    <title>Codelo VN - Enterprise Multi-Checkout</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,7 +30,6 @@
             max-width: 480px;
         }
 
-        /* Header Style */
         .brand-header {
             margin-bottom: 32px;
             padding-left: 8px;
@@ -47,7 +46,6 @@
             font-size: 14px;
         }
 
-        /* Card Section Style */
         .section-card {
             background: var(--card-bg);
             border-radius: 16px;
@@ -67,7 +65,11 @@
             display: block;
         }
 
-        /* Product Option */
+        /* Danh sách sản phẩm động */
+        .product-list {
+            display: grid;
+            gap: 12px;
+        }
         .product-option {
             border: 2px solid var(--border-color);
             border-radius: 12px;
@@ -75,7 +77,10 @@
             display: flex;
             align-items: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+        }
+        .product-option:hover {
+            border-color: #cbd5e1;
         }
         .product-option.selected {
             border-color: var(--primary-blue);
@@ -86,12 +91,12 @@
             border: 2px solid var(--border-color);
             border-radius: 50%;
             margin-right: 16px;
+            transition: all 0.2s;
         }
-        .selected .dot {
+        .product-option.selected .dot {
             border: 5px solid var(--primary-blue);
         }
 
-        /* Form Input */
         .input-box {
             width: 100%;
             padding: 14px;
@@ -107,7 +112,6 @@
             border-color: var(--primary-blue);
         }
 
-        /* Button */
         .btn-pay {
             width: 100%;
             padding: 16px;
@@ -123,17 +127,17 @@
         .btn-pay:hover { background: #1d4ed8; }
         .btn-pay:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* QR Style */
         #qrScreen { display: none; text-align: center; }
-        .qr-img { width: 200px; height: 200px; margin: 20px 0; }
+        .qr-img { width: 200px; height: 200px; margin: 20px 0; border-radius: 12px; border: 1px solid var(--border-color); }
         .code-display {
             background: #f8fafc;
             padding: 12px;
             border-radius: 8px;
             font-family: monospace;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--primary-blue);
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -149,13 +153,8 @@
     <div id="mainForm">
         <div class="section-card">
             <span class="label-text">Dịch vụ cung cấp</span>
-            <div class="product-option selected" id="prod1">
-                <div class="dot"></div>
-                <div>
-                    <div style="font-weight:600">Bản mẫu vật lý Codelo</div>
-                    <div style="color:var(--text-muted); font-size: 13px;">2.000 ₫</div>
+            <div class="product-list" id="productGrid">
                 </div>
-            </div>
         </div>
 
         <div class="section-card">
@@ -172,12 +171,48 @@
         <h3 style="margin-top:0">Quét mã QR để thanh toán</h3>
         <img id="qrImg" class="qr-img" src="" alt="QR">
         <div class="code-display" id="transferCode"></div>
+        <p style="font-size: 14px; font-weight: 600; margin-top: 15px; color: #1e293b;" id="qrPriceDisplay"></p>
         <p style="font-size: 13px; color: var(--text-muted)">Hệ thống sẽ tự động gửi file qua Email của bạn.</p>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
+
+    // 🌟 KHO SẢN PHẨM: CẬU CHỦ MUỐN THÊM GÓI MỚI THÌ THÊM VÀO ĐÂY NHA 🎉
+    const dataProducts = [
+        { id: "g1", name: "Bản mẫu vật lý Codelo (Gói Cơ Bản)", price: 2000 },
+        { id: "g2", name: "Tài liệu nâng cao Codelo (Gói 9K)", price: 9000 },
+        { id: "g3", name: "Combo Full Tính Năng Codelo (Gói 10K)", price: 10000 }
+    ];
+
+    let currentSelectedProduct = dataProducts[0]; // Mặc định chọn gói đầu tiên
+
+    // Hàm tự động vẽ các gói lên màn hình
+    function initProducts() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        dataProducts.forEach((prod, index) => {
+            const isSelected = index === 0 ? 'selected' : '';
+            const html = `
+                <div class="product-option ${isSelected}" id="item-${prod.id}" onclick="changeProduct('${prod.id}')">
+                    <div class="dot"></div>
+                    <div>
+                        <div style="font-weight:600">${prod.name}</div>
+                        <div style="color:var(--text-muted); font-size: 13px;">${prod.price.toLocaleString('vi-VN')} ₫</div>
+                    </div>
+                </div>
+            `;
+            grid.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    // Hàm xử lý khi khách click chọn gói khác
+    function changeProduct(id) {
+        document.querySelectorAll('.product-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById(`item-${id}`).classList.add('selected');
+        currentSelectedProduct = dataProducts.find(p => p.id === id);
+    }
 
     function processPayment() {
         const name = document.getElementById('cName').value.trim();
@@ -191,13 +226,14 @@
         }
         
         const btn = document.getElementById('btnSubmit');
-        btn.innerText = "Đang xử lý dữ liệu...";
+        btn.innerText = "Đang khởi tạo đơn hàng...";
         btn.disabled = true;
 
         const code = "CODELO" + Math.floor(1000 + Math.random() * 9000);
-        const qr = `https://img.vietqr.io/image/TPBank-00005508312-compact2.png?amount=2000&addInfo=${code}&accountName=TRAN BUI NHUT HY`;
+        // Tạo mã QR lấy đúng giá tiền của gói đang chọn mua động
+        const qr = `https://img.vietqr.io/image/TPBank-00005508312-compact2.png?amount=${currentSelectedProduct.price}&addInfo=${code}&accountName=TRAN BUI NHUT HY`;
         
-        // Gửi toàn bộ dữ liệu (Email, Tên, SĐT) về Sheets
+        // Gửi toàn bộ thông tin kèm Tên sản phẩm và Giá sản phẩm lên Sheets
         fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -207,12 +243,14 @@
                 orderCode: code,
                 customerName: name || "bạn", 
                 customerPhone: phone || "Không cung cấp",
-                productName: "Bản mẫu vật lý Codelo" 
+                productName: currentSelectedProduct.name,
+                productPrice: currentSelectedProduct.price // Bắn giá gói lên Sheets
             })
         }).then(() => {
             document.getElementById('mainForm').style.display = 'none';
             document.getElementById('qrImg').src = qr;
             document.getElementById('transferCode').innerText = code;
+            document.getElementById('qrPriceDisplay').innerText = `Số tiền cần chuyển: ${currentSelectedProduct.price.toLocaleString('vi-VN')} ₫`;
             document.getElementById('qrScreen').style.display = 'block';
         }).catch(() => {
             alert("Lỗi kết nối mạng. Vui lòng thử lại!");
@@ -220,6 +258,9 @@
             btn.disabled = false;
         });
     }
+
+    // Chạy vẽ danh sách sản phẩm khi web tải xong
+    window.onload = initProducts;
 </script>
 
 </body>

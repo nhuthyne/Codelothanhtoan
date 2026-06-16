@@ -75,14 +75,14 @@
         const ACCOUNT_NAME = "TRAN BUI NHUT HY"; // Tên chủ tài khoản
         const PRODUCT_PRICE = "20000"; // Giá tiền sản phẩm (VND)
         
-        // Link Apps Script nhận dữ liệu (Đã cập nhật theo yêu cầu)
+        // Link Apps Script nhận dữ liệu (Đã cấu hình sẵn cho cậu chủ)
         const scriptUrl = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
         // ==========================================
 
         function generateInvoice() {
             const email = document.getElementById('customerEmail').value;
             if(!email || !email.includes('@')) { 
-                alert("Vui lòng nhập đúng địa chỉ Email nhé!"); 
+                alert("Cậu chủ nhắc khách nhập đúng địa chỉ Email nhé!"); 
                 return; 
             }
 
@@ -96,13 +96,14 @@
             // Link tạo ảnh QR từ VietQR
             const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${PRODUCT_PRICE}&addInfo=${orderCode}&accountName=${ACCOUNT_NAME}`;
 
-            // Gửi dữ liệu (Email & Mã đơn) lên Google Sheets
+            // GỬI DỮ LIỆU LÊN GOOGLE SHEETS (ĐÃ SỬA LỖI BẢO MẬT)
             fetch(scriptUrl, {
                 method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "text/plain;charset=utf-8" 
+                },
                 body: JSON.stringify({ action: "createOrder", email: email, orderCode: orderCode })
-            }).then(() => {
+            }).then(response => {
                 // Sau khi gửi dữ liệu xong thì hiển thị mã QR lên màn hình
                 document.getElementById('qrImage').src = qrUrl;
                 document.getElementById('transferContent').innerText = orderCode;
@@ -111,7 +112,7 @@
                 document.getElementById('payBtn').style.display = "none";
                 document.getElementById('customerEmail').disabled = true; // Khóa ô nhập email để tránh nhập lại
             }).catch(error => {
-                alert("Có lỗi xảy ra khi tạo đơn. Em hãy kiểm tra lại kết nối mạng nhé!");
+                alert("Có lỗi xảy ra khi tạo đơn. Xin cậu chủ kiểm tra lại nhé!");
                 document.getElementById('payBtn').innerText = "Thử lại";
                 document.getElementById('payBtn').style.opacity = "1";
             });

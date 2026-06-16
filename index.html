@@ -3,121 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codelo - Thanh Toán Tự Động</title>
+    <title>Codelo VN - Enterprise Checkout</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.4);
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --primary: #8a98f1; /* Tông pastel tím xanh */
-            --text-color: #4a4a4a;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --primary-blue: #2563eb;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
+
         body {
-            /* Nền gradient pastel nhẹ nhàng */
-            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;
+            background-color: var(--bg-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
         }
-        .checkout-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 40px 30px; border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            width: 340px; border: 1px solid var(--glass-border);
-            text-align: center; color: var(--text-color);
+
+        .checkout-container {
+            width: 100%;
+            max-width: 480px;
         }
-        .checkout-card h2 { margin-top: 0; color: #5a67d8; font-weight: 700; }
-        input {
-            width: 100%; padding: 14px; margin: 15px 0; border: none;
-            border-radius: 12px; background: rgba(255, 255, 255, 0.7);
-            color: #333; box-sizing: border-box; font-size: 14px;
-            outline: 2px solid transparent; transition: all 0.3s;
+
+        /* Header Style */
+        .brand-header {
+            margin-bottom: 32px;
+            padding-left: 8px;
         }
-        input:focus { outline: 2px solid var(--primary); background: #fff; }
-        button {
-            width: 100%; padding: 14px; background: var(--primary); border: none;
-            border-radius: 12px; color: white; font-weight: bold; font-size: 16px;
-            cursor: pointer; transition: transform 0.2s, background 0.2s;
-            box-shadow: 0 4px 15px rgba(138, 152, 241, 0.4);
+        .brand-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
         }
-        button:hover { transform: translateY(-2px); background: #7685e8; }
-        .qr-box { margin-top: 25px; display: none; animation: fadeIn 0.5s ease-in-out; }
-        .qr-box img { width: 100%; border-radius: 16px; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .magic-code { background: white; padding: 10px; border-radius: 8px; font-weight: bold; color: #e53e3e; letter-spacing: 1px; margin: 10px 0;}
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .brand-header p {
+            color: var(--text-muted);
+            margin: 4px 0 0;
+            font-size: 14px;
+        }
+
+        /* Card Section Style */
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .label-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        /* Product Option */
+        .product-option {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .product-option.selected {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+        }
+        .dot {
+            width: 18px; height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            margin-right: 16px;
+        }
+        .selected .dot {
+            border: 5px solid var(--primary-blue);
+        }
+
+        /* Form Input */
+        .input-box {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-box:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        /* Button */
+        .btn-pay {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-pay:hover { background: #1d4ed8; }
+
+        /* QR Style */
+        #qrScreen { display: none; text-align: center; }
+        .qr-img { width: 200px; height: 200px; margin: 20px 0; }
+        .code-display {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
     </style>
 </head>
 <body>
 
-    <div class="checkout-card">
-        <h2>Codelo Store</h2>
-        <p style="font-size: 14px; margin-bottom: 25px;">Nhập Email để nhận sản phẩm ngay lập tức sau khi thanh toán ⚡</p>
-        
-        <input type="email" id="customerEmail" placeholder="ví dụ: khachhang@gmail.com" required>
-        <button id="payBtn" onclick="generateInvoice()">Tiến Hành Thanh Toán</button>
-
-        <div id="qrResult" class="qr-box">
-            <p style="font-size: 13px; font-weight: bold;">Quét mã qua App Ngân hàng/ZaloPay</p>
-            <img id="qrImage" src="" alt="Mã QR Thanh Toán">
-            
-            <p style="font-size: 13px; margin-top: 15px;">Hoặc chuyển khoản thủ công với nội dung:</p>
-            <div class="magic-code" id="transferContent"></div>
-            <p style="font-size: 12px; color: #718096;">Hệ thống sẽ tự động gửi file về email trong 5-10 giây.</p>
-        </div>
+<div class="checkout-container">
+    <div class="brand-header">
+        <h1>Codelo VN</h1>
+        <p>Cổng thanh toán trực tuyến - nhận tài liệu qua gmail trong 2 phút</p>
+<p>Liên hệ Codelo tại: 0376-138-554</p>
     </div>
 
-    <script>
-        // ==========================================
-        // THÔNG TIN CẤU HÌNH CỦA CODELO
-        // ==========================================
-        const BANK_ID = "TPBank"; // Mã ngân hàng 
-        const ACCOUNT_NO = "00005508312"; // Số tài khoản 
-        const ACCOUNT_NAME = "TRAN BUI NHUT HY"; // Tên chủ tài khoản
-        const PRODUCT_PRICE = "2000"; // Giá tiền sản phẩm (VND)
+    <div id="mainForm">
+        <div class="section-card">
+            <span class="label-text">Dịch vụ cung cấp</span>
+            <div class="product-option selected" id="prod1">
+                <div class="dot"></div>
+                <div>
+                    <div style="font-weight:600">Bản mẫu vật lý Codelo</div>
+                    <div style="color:var(--text-muted); font-size: 13px;">2.000 ₫</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <span class="label-text">Thông tin liên hệ</span>
+            <input type="text" class="input-box" id="cName" placeholder="Họ và tên (Ví dụ: Nguyễn Văn A)">
+            <input type="tel" class="input-box" id="cPhone" placeholder="Số điện thoại (Ví dụ: 0912 345 678)">
+            <input type="email" class="input-box" id="cEmail" placeholder="Email nhận file (Ví dụ: nguyenvan@gmail.com)">
+        </div>
+
+        <button class="btn-pay" onclick="processPayment()">Xác nhận thanh toán</button>
+    </div>
+
+    <div id="qrScreen" class="section-card">
+        <h3 style="margin-top:0">Quét mã QR để thanh toán</h3>
+        <img id="qrImg" class="qr-img" src="" alt="QR">
+        <div class="code-display" id="transferCode"></div>
+        <p style="font-size: 13px; color: var(--text-muted)">Hệ thống sẽ gửi file qua Email sau khi nhận tiền.</p>
+    </div>
+</div>
+
+<script>
+    function processPayment() {
+        const email = document.getElementById('cEmail').value;
+        if(!email.includes('@')) { alert("Vui lòng nhập Email hợp lệ"); return; }
         
-        // Link Apps Script nhận dữ liệu (Đã cấu hình sẵn cho cậu chủ)
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
-        // ==========================================
-
-        function generateInvoice() {
-            const email = document.getElementById('customerEmail').value;
-            if(!email || !email.includes('@')) { 
-                alert("Cậu chủ nhắc khách nhập đúng địa chỉ Email nhé!"); 
-                return; 
-            }
-
-            // Đổi giao diện nút bấm trong lúc chờ
-            document.getElementById('payBtn').innerText = "Đang tạo đơn hàng...";
-            document.getElementById('payBtn').style.opacity = "0.7";
-
-            // Tạo mã đơn hàng duy nhất
-            const orderCode = "CODELO" + Math.floor(1000 + Math.random() * 9000);
-            
-            // Link tạo ảnh QR từ VietQR
-            const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${PRODUCT_PRICE}&addInfo=${orderCode}&accountName=${ACCOUNT_NAME}`;
-
-            // GỬI DỮ LIỆU LÊN GOOGLE SHEETS (ĐÃ SỬA LỖI BẢO MẬT)
-            fetch(scriptUrl, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "text/plain;charset=utf-8" 
-                },
-                body: JSON.stringify({ action: "createOrder", email: email, orderCode: orderCode })
-            }).then(response => {
-                // Sau khi gửi dữ liệu xong thì hiển thị mã QR lên màn hình
-                document.getElementById('qrImage').src = qrUrl;
-                document.getElementById('transferContent').innerText = orderCode;
-                
-                document.getElementById('qrResult').style.display = "block";
-                document.getElementById('payBtn').style.display = "none";
-                document.getElementById('customerEmail').disabled = true; // Khóa ô nhập email để tránh nhập lại
-            }).catch(error => {
-                alert("Có lỗi xảy ra khi tạo đơn. Xin cậu chủ kiểm tra lại nhé!");
-                document.getElementById('payBtn').innerText = "Thử lại";
-                document.getElementById('payBtn').style.opacity = "1";
-            });
-        }
-    </script>
+        const code = "CODELO" + Math.floor(1000 + Math.random() * 9000);
+        const qr = `https://img.vietqr.io/image/TPBank-00005508312-compact2.png?amount=2000&addInfo=${code}&accountName=TRAN BUI NHUT HY`;
+        
+        document.getElementById('mainForm').style.display = 'none';
+        document.getElementById('qrImg').src = qr;
+        document.getElementById('transferCode').innerText = code;
+        document.getElementById('qrScreen').style.display = 'block';
+    }
+</script>
 
 </body>
 </html>

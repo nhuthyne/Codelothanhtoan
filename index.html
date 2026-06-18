@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Codelo VN - Enterprise Multi-Checkout</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -14,6 +14,8 @@
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --danger: #e11d48;
+            --success: #059669;
         }
 
         body {
@@ -27,23 +29,77 @@
 
         .checkout-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 520px; /* Nới rộng nhẹ để tối ưu cho iPad/Desktop */
         }
 
         .brand-header {
-            margin-bottom: 32px;
-            padding-left: 8px;
+            margin-bottom: 24px;
+            text-align: center;
         }
         .brand-header h1 {
             font-size: 28px;
             font-weight: 700;
             color: #0f172a;
-            margin: 0;
+            margin: 0 0 8px 0;
         }
         .brand-header p {
             color: var(--text-muted);
-            margin: 4px 0 0;
+            margin: 0 0 16px 0;
             font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* KHU VỰC NÚT BẤM ZALO & HƯỚNG DẪN */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-action {
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            padding: 10px 18px; 
+            border-radius: 12px; 
+            font-size: 14px; 
+            font-weight: 600;
+            text-decoration: none; 
+            cursor: pointer; 
+            border: none; 
+            transition: all 0.3s ease;
+        }
+
+        .btn-zalo {
+            background: linear-gradient(135deg, #0088FF, #0054c6); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 104, 255, 0.25);
+        }
+        .btn-zalo:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 16px rgba(0, 104, 255, 0.4); 
+        }
+        
+        /* Chữa lỗi icon Zalo bằng mã SVG nhúng trực tiếp */
+        .zalo-logo { 
+            width: 20px; 
+            height: 20px; 
+            margin-right: 8px; 
+            fill: white;
+        }
+
+        .btn-guide {
+            background: #f8fafc; 
+            color: #334155; 
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+        .btn-guide:hover { 
+            background: #f1f5f9; 
+            transform: translateY(-2px); 
+            border-color: #94a3b8;
         }
 
         .section-card {
@@ -56,9 +112,9 @@
         }
 
         .label-text {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 16px;
@@ -79,65 +135,132 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        .product-option:hover {
+        .product-option:hover:not(.disabled) {
             border-color: #cbd5e1;
         }
         .product-option.selected {
             border-color: var(--primary-blue);
             background-color: #eff6ff;
         }
+        .product-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f8fafc;
+        }
+        
         .dot {
             width: 18px; height: 18px;
             border: 2px solid var(--border-color);
             border-radius: 50%;
             margin-right: 16px;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .product-option.selected .dot {
             border: 5px solid var(--primary-blue);
         }
 
-        .input-box {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            margin-bottom: 16px;
+        .price-container {
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .old-price {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            margin-right: 6px;
+        }
+        .new-price {
+            color: var(--danger);
+            font-weight: 700;
             font-size: 15px;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
         }
-        .input-box:focus {
-            outline: none;
-            border-color: var(--primary-blue);
+
+        .input-group { margin-bottom: 20px; }
+        .input-box {
+            width: 100%; padding: 14px; border: 1px solid var(--border-color);
+            border-radius: 10px; font-size: 15px; box-sizing: border-box;
+            transition: border-color 0.2s; background: #fafafa;
         }
+        .input-box:focus { outline: none; border-color: var(--primary-blue); background: white; }
+        
+        /* Sửa lỗi rớt chữ bằng Flexbox */
+        .helper-text { 
+            display: flex; 
+            align-items: flex-start;
+            gap: 6px;
+            font-size: 12.5px; 
+            margin-top: 8px; 
+            color: var(--text-muted); 
+            line-height: 1.4;
+        }
+        .helper-icon {
+            flex-shrink: 0;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        .trust-text { color: var(--success); font-weight: 500; }
 
         .btn-pay {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary-blue);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.2s;
+            width: 100%; padding: 16px; background: var(--primary-blue); color: white;
+            border: none; border-radius: 12px; font-weight: 600; font-size: 16px;
+            cursor: pointer; transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
         .btn-pay:hover { background: #1d4ed8; }
-        .btn-pay:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn-pay:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
 
-        #qrScreen { display: none; text-align: center; }
-        .qr-img { width: 200px; height: 200px; margin: 20px 0; border-radius: 12px; border: 1px solid var(--border-color); }
+        #qrScreen { display: none; text-align: center; overflow: hidden; }
+        .qr-img { width: 220px; height: 220px; margin: 20px 0; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card); }
         .code-display {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary-blue);
-            letter-spacing: 1px;
+            background: #f8fafc; padding: 14px; border-radius: 10px; font-family: monospace;
+            font-size: 22px; font-weight: 700; color: var(--primary-blue); letter-spacing: 1px;
+            border: 1px dashed #cbd5e1; margin: 0 20px;
+        }
+        
+        .marquee-container {
+            background-color: #fef3c7; color: #b45309; padding: 12px; border-radius: 8px;
+            font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #fde68a;
+        }
+
+        /* POPUP HƯỚNG DẪN SỬ DỤNG */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(3px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; transition: opacity 0.3s ease; padding: 20px;
+        }
+        .modal-overlay.show { opacity: 1; }
+        .modal-content {
+            background: white; width: 100%; max-width: 420px; border-radius: 20px;
+            padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            transform: translateY(20px); transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; font-size: 20px; color: #0f172a; }
+        .close-btn { background: #f1f5f9; border: none; font-size: 20px; cursor: pointer; color: #64748b; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s;}
+        .close-btn:hover { background: #e2e8f0; color: #1e293b; }
+        
+        .guide-step { display: flex; margin-bottom: 16px; align-items: flex-start; }
+        .step-num { 
+            background: var(--primary-blue); color: white; width: 24px; height: 24px; 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            font-size: 12px; font-weight: 700; margin-right: 12px; flex-shrink: 0; margin-top: 2px;
+        }
+        .step-text { font-size: 14px; color: #334155; line-height: 1.5; }
+        .step-text strong { color: #0f172a; }
+
+        /* TỐI ƯU GIAO DIỆN DI ĐỘNG (RESPONSIVE) */
+        @media screen and (max-width: 480px) {
+            body { padding: 20px 15px; }
+            .section-card { padding: 20px 16px; margin-bottom: 16px; }
+            .brand-header h1 { font-size: 24px; }
+            .action-buttons { flex-direction: column; }
+            .btn-action { width: 100%; }
+            .product-option { padding: 14px 12px; }
+            .qr-img { width: 180px; height: 180px; }
+            .code-display { font-size: 18px; margin: 0 10px; }
+            .modal-content { padding: 20px; }
         }
     </style>
 </head>
@@ -146,8 +269,19 @@
 <div class="checkout-container">
     <div class="brand-header">
         <h1>Codelo VN</h1>
-        <p>Cổng thanh toán trực tuyến - nhận tài liệu qua gmail trong 2 phút</p>
-        <p>Liên hệ Codelo tại: 0376-138-554</p>
+        <p>Cổng thanh toán tự động nhận tài liệu qua Email ngay lập tức.</p>
+        
+        <div class="action-buttons">
+            <a href="https://zalo.me/0376138554" target="_blank" class="btn-action btn-zalo">
+                <svg viewBox="0 0 24 24" class="zalo-logo" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.82 11.83c0-4.63-3.95-8.38-8.82-8.38-4.88 0-8.83 3.75-8.83 8.38 0 2.45 1.11 4.65 2.89 6.18l-.9 2.76c-.1.32.22.6.51.46l3.18-1.57c1 .35 2.06.54 3.15.54 4.87 0 8.82-3.75 8.82-8.37zM9.54 14.18H7.31v-4.9h2.23v4.9zm4.27 0h-2.2v-4.9h2.2v4.9zm3.55 0h-1.39l-1.3-1.85v1.85h-1.36v-4.9h1.4l1.29 1.84V9.28h1.36v4.9z"/>
+                </svg>
+                Chat Zalo hỗ trợ
+            </a>
+            <button onclick="openGuide()" class="btn-action btn-guide">
+                📖 Hướng dẫn mua hàng
+            </button>
+        </div>
     </div>
 
     <div id="mainForm">
@@ -158,48 +292,107 @@
         </div>
 
         <div class="section-card">
-            <span class="label-text">Thông tin liên hệ</span>
-            <input type="text" class="input-box" id="cName" placeholder="Họ và tên (Ví dụ: Nguyễn Văn A)">
-            <input type="tel" class="input-box" id="cPhone" placeholder="Số điện thoại (Ví dụ: 0912 345 678)">
-            <input type="email" class="input-box" id="cEmail" placeholder="Email nhận file (Ví dụ: nguyenvan@gmail.com)">
+            <span class="label-text">Thông tin nhận tài liệu</span>
+            
+            <div class="input-group">
+                <input type="text" class="input-box" id="cName" placeholder="Họ và tên (Ví dụ: Nguyễn Văn A)">
+            </div>
+
+            <div class="input-group">
+                <input type="email" class="input-box" id="cEmail" placeholder="Email nhận file (*Bắt buộc)">
+                <div class="helper-text trust-text">
+                    <span class="helper-icon">🔒</span>
+                    <span>An tâm 100% - Email chỉ dùng để hệ thống gửi tự động tài liệu cho bạn.</span>
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-bottom: 0;">
+                <input type="tel" class="input-box" id="cPhone" placeholder="Số điện thoại (Không bắt buộc)">
+                <div class="helper-text">
+                    <span class="helper-icon">💡</span>
+                    <span>Khuyến nghị nhập để Codelo hỗ trợ bạn nhanh nhất nếu gặp sự cố.</span>
+                </div>
+            </div>
         </div>
 
         <button class="btn-pay" id="btnSubmit" onclick="processPayment()">Xác nhận thanh toán</button>
     </div>
 
     <div id="qrScreen" class="section-card">
-        <h3 style="margin-top:0">Quét mã QR để thanh toán</h3>
+        <div class="marquee-container">
+            <marquee scrollamount="6">⚠️ Lưu ý: File tài liệu sẽ được gửi tự động qua Email trong 1-2 phút. Nếu không nhận được ở Hộp thư đến, bạn vui lòng kiểm tra thêm mục THƯ RÁC (SPAM) nhé!</marquee>
+        </div>
+        
+        <h3 style="margin-top:0; color: var(--text-main);">Quét mã QR để thanh toán</h3>
         <img id="qrImg" class="qr-img" src="" alt="QR">
         <div class="code-display" id="transferCode"></div>
-        <p style="font-size: 14px; font-weight: 600; margin-top: 15px; color: #1e293b;" id="qrPriceDisplay"></p>
-        <p style="font-size: 13px; color: var(--text-muted)">Hệ thống sẽ tự động gửi file qua Email của bạn, vui lòng kiểm tra mục Spam nếu không tìm thấy.</p>
+        <p style="font-size: 16px; font-weight: 700; margin-top: 15px; color: var(--danger);" id="qrPriceDisplay"></p>
+        <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5;">Vui lòng giữ nguyên nội dung chuyển khoản.<br>Hệ thống xử lý hoàn toàn tự động 24/7.</p>
+    </div>
+</div>
+
+<div class="modal-overlay" id="guideModal" onclick="closeGuide(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2>📖 Quy trình tự động</h2>
+            <button class="close-btn" onclick="closeGuide()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="guide-step">
+                <div class="step-num">1</div>
+                <div class="step-text">Chọn gói tài liệu bạn muốn sở hữu.</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-num">2</div>
+                <div class="step-text">Điền chính xác <strong>Email</strong> (Số điện thoại có thể bỏ qua).</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-num">3</div>
+                <div class="step-text">Bấm <strong>Xác nhận thanh toán</strong> để hệ thống tạo mã QR riêng cho bạn.</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-num">4</div>
+                <div class="step-text">Quét mã QR bằng App Ngân Hàng và <strong>tuyệt đối không sửa nội dung chuyển khoản</strong>.</div>
+            </div>
+            <div class="guide-step">
+                <div class="step-num">5</div>
+                <div class="step-text">Đợi 1-2 phút, hệ thống sẽ cấp phép và gửi tài liệu thẳng vào Email của bạn. <br><em style="color:var(--danger); font-size: 13px;">(Lưu ý: Luôn kiểm tra mục Thư rác/Spam nếu chưa thấy nhé!)</em></div>
+            </div>
+        </div>
+        <button class="btn-pay" style="margin-top: 10px; background: #0f172a;" onclick="closeGuide()">Đã hiểu, đóng lại</button>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypLx5IWG_RGbc31bMoXlqSnUnojtrRPbs_qo6s2XQyJYyjrS-dr7l0Iv0lYmOoNqB0dA/exec";
 
-    // 🌟 KHO SẢN PHẨM: CẬU CHỦ MUỐN THÊM GÓI MỚI THÌ THÊM VÀO ĐÂY NHA 🎉
+    // 🌟 KHO SẢN PHẨM
     const dataProducts = [
-        { id: "g1", name: "Tài liệu Excel cơ bản", price: 9700 },
-        { id: "g2", name: "Tài liệu nâng cao Codelo ( Chưa triển khai)", price: 20000 },
-        { id: "g3", name: "Combo Full Tính Năng Codelo (Chưa triển khai)", price: 100000 }
+        { id: "g1", name: "Tài liệu Excel cơ bản", price: 19000, oldPrice: 49000, disabled: false },
+        { id: "g2", name: "Tài liệu nâng cao Codelo (Chưa triển khai)", price: 20000, disabled: true },
+        { id: "g3", name: "Combo Full Tính Năng Codelo (Chưa triển khai)", price: 100000, disabled: true }
     ];
 
-    let currentSelectedProduct = dataProducts[0]; // Mặc định chọn gói đầu tiên
+    let currentSelectedProduct = dataProducts[0]; 
 
-    // Hàm tự động vẽ các gói lên màn hình
     function initProducts() {
         const grid = document.getElementById('productGrid');
         grid.innerHTML = '';
         dataProducts.forEach((prod, index) => {
-            const isSelected = index === 0 ? 'selected' : '';
+            const isSelected = (!prod.disabled && index === 0) ? 'selected' : '';
+            const isDisabled = prod.disabled ? 'disabled' : '';
+            const clickEvent = prod.disabled ? '' : `onclick="changeProduct('${prod.id}')"`;
+            
+            const priceDisplay = prod.oldPrice 
+                ? `<span class="old-price">${prod.oldPrice.toLocaleString('vi-VN')} ₫</span> <span class="new-price">${prod.price.toLocaleString('vi-VN')} ₫</span>`
+                : `<span class="new-price">${prod.price.toLocaleString('vi-VN')} ₫</span>`;
+
             const html = `
-                <div class="product-option ${isSelected}" id="item-${prod.id}" onclick="changeProduct('${prod.id}')">
+                <div class="product-option ${isSelected} ${isDisabled}" id="item-${prod.id}" ${clickEvent}>
                     <div class="dot"></div>
                     <div>
-                        <div style="font-weight:600">${prod.name}</div>
-                        <div style="color:var(--text-muted); font-size: 13px;">${prod.price.toLocaleString('vi-VN')} ₫</div>
+                        <div style="font-weight:600; color: var(--text-main);">${prod.name}</div>
+                        <div class="price-container">${priceDisplay}</div>
                     </div>
                 </div>
             `;
@@ -207,11 +400,13 @@
         });
     }
 
-    // Hàm xử lý khi khách click chọn gói khác
     function changeProduct(id) {
+        const targetProduct = dataProducts.find(p => p.id === id);
+        if(targetProduct.disabled) return;
+
         document.querySelectorAll('.product-option').forEach(el => el.classList.remove('selected'));
         document.getElementById(`item-${id}`).classList.add('selected');
-        currentSelectedProduct = dataProducts.find(p => p.id === id);
+        currentSelectedProduct = targetProduct;
     }
 
     function processPayment() {
@@ -221,7 +416,8 @@
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if(!emailRegex.test(email)) { 
-            alert("Vui lòng nhập Email hợp lệ để nhận file"); 
+            alert("Vui lòng nhập Email hợp lệ để Codelo gửi file cho bạn nhé!"); 
+            document.getElementById('cEmail').focus();
             return; 
         }
         
@@ -230,10 +426,8 @@
         btn.disabled = true;
 
         const code = "CODELO" + Math.floor(1000 + Math.random() * 9000);
-        // Tạo mã QR lấy đúng giá tiền của gói đang chọn mua động
         const qr = `https://img.vietqr.io/image/TPBank-00005508312-compact2.png?amount=${currentSelectedProduct.price}&addInfo=${code}&accountName=TRAN BUI NHUT HY`;
         
-        // Gửi toàn bộ thông tin kèm Tên sản phẩm và Giá sản phẩm lên Sheets
         fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -244,7 +438,7 @@
                 customerName: name || "bạn", 
                 customerPhone: phone || "Không cung cấp",
                 productName: currentSelectedProduct.name,
-                productPrice: currentSelectedProduct.price // Bắn giá gói lên Sheets
+                productPrice: currentSelectedProduct.price 
             })
         }).then(() => {
             document.getElementById('mainForm').style.display = 'none';
@@ -259,7 +453,19 @@
         });
     }
 
-    // Chạy vẽ danh sách sản phẩm khi web tải xong
+    // CÁC HÀM XỬ LÝ BẬT/TẮT POPUP HƯỚNG DẪN
+    function openGuide() {
+        const modal = document.getElementById('guideModal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    function closeGuide(e) {
+        const modal = document.getElementById('guideModal');
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+    }
+
     window.onload = initProducts;
 </script>
 
